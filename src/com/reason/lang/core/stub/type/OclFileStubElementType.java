@@ -9,11 +9,16 @@ import com.reason.lang.ocaml.*;
 import org.jetbrains.annotations.*;
 
 public class OclFileStubElementType extends IStubFileElementType<OclFileStub> {
-    private static final int VERSION = 8;
+    private static final int VERSION = 9;
     public static final IStubFileElementType<OclFileStub> INSTANCE = new OclFileStubElementType();
 
     private OclFileStubElementType() {
         super("OCAML_FILE", OclLanguage.INSTANCE);
+    }
+
+    @Override
+    public int getStubVersion() {
+        return VERSION;
     }
 
     @Override
@@ -27,11 +32,6 @@ public class OclFileStubElementType extends IStubFileElementType<OclFileStub> {
                 return new PsiFileStubImpl<>(file);
             }
         };
-    }
-
-    @Override
-    public int getStubVersion() {
-        return VERSION;
     }
 
     @Override

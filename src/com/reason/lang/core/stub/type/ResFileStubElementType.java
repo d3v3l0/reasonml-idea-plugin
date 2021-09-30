@@ -1,23 +1,26 @@
 package com.reason.lang.core.stub.type;
 
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.StubBuilder;
+import com.intellij.psi.*;
 import com.intellij.psi.stubs.*;
-import com.intellij.psi.tree.IStubFileElementType;
+import com.intellij.psi.tree.*;
 import com.reason.ide.files.*;
-import com.reason.lang.core.stub.ResFileStub;
-import com.reason.lang.rescript.ResLanguage;
+import com.reason.lang.core.stub.*;
+import com.reason.lang.rescript.*;
+import org.jetbrains.annotations.*;
 
 import java.io.*;
 
-import org.jetbrains.annotations.NotNull;
-
 public class ResFileStubElementType extends IStubFileElementType<ResFileStub> {
-    private static final int VERSION = 8;
+    private static final int VERSION = 9;
     public static final IStubFileElementType<ResFileStub> INSTANCE = new ResFileStubElementType();
 
     private ResFileStubElementType() {
         super("RESCRIPT_FILE", ResLanguage.INSTANCE);
+    }
+
+    @Override
+    public int getStubVersion() {
+        return VERSION;
     }
 
     @Override
@@ -33,11 +36,6 @@ public class ResFileStubElementType extends IStubFileElementType<ResFileStub> {
                 return new PsiFileStubImpl<>(file);
             }
         };
-    }
-
-    @Override
-    public int getStubVersion() {
-        return VERSION;
     }
 
     @Override

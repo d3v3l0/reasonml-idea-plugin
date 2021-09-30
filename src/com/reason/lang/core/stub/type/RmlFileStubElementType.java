@@ -11,11 +11,16 @@ import org.jetbrains.annotations.*;
 import java.io.*;
 
 public class RmlFileStubElementType extends IStubFileElementType<RmlFileStub> {
-    private static final int VERSION = 7;
+    private static final int VERSION = 9;
     public static final IStubFileElementType<RmlFileStub> INSTANCE = new RmlFileStubElementType();
 
     private RmlFileStubElementType() {
         super("REASON_FILE", RmlLanguage.INSTANCE);
+    }
+
+    @Override
+    public int getStubVersion() {
+        return VERSION;
     }
 
     @Override
@@ -31,11 +36,6 @@ public class RmlFileStubElementType extends IStubFileElementType<RmlFileStub> {
                 return new PsiFileStubImpl<>(file);
             }
         };
-    }
-
-    @Override
-    public int getStubVersion() {
-        return VERSION;
     }
 
     @Override
