@@ -332,7 +332,7 @@ public class ORUtil {
 
     @Nullable
     public static String computeAlias(@Nullable PsiElement rootElement, @NotNull Language language, boolean lowerAccepted) {
-        boolean isALias = true;
+        boolean isAlias = true;
 
         PsiElement currentElement = rootElement;
         ORTypes types = getTypes(language);
@@ -342,7 +342,7 @@ public class ORUtil {
             if (elementType != TokenType.WHITE_SPACE && elementType != types.C_UPPER_SYMBOL && elementType != types.DOT) {
                 // if last term is lower symbol, and we accept lower symbol, then it's an alias
                 if (elementType != types.C_LOWER_SYMBOL || currentElement.getNextSibling() != null || !lowerAccepted) {
-                    isALias = false;
+                    isAlias = false;
                     break;
                 }
             }
@@ -355,7 +355,7 @@ public class ORUtil {
             elementType = currentElement == null ? null : currentElement.getNode().getElementType();
         }
 
-        return isALias ? aliasName.toString() : null;
+        return isAlias ? aliasName.toString() : null;
     }
 
     public static @Nullable String[] getQualifiedNameAsPath(@NotNull PsiQualifiedPathElement element) {

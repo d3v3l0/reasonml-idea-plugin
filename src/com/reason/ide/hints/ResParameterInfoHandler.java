@@ -14,24 +14,21 @@ public class ResParameterInfoHandler extends ORParameterInfoHandler {
     }
 
     @Override
-    @Nullable ArgumentsDescription[] calculateParameterInfo(PsiFunctionCallParams paramsOwner) {
+    @Nullable ArgumentsDescription[] calculateParameterInfo(@Nullable PsiFunctionCallParams paramsOwner) {
         PsiLowerSymbol functionName = PsiTreeUtil.getPrevSiblingOfType(paramsOwner, PsiLowerSymbol.class);
         PsiReference reference = functionName == null ? null : functionName.getReference();
-        if (reference instanceof PsiLowerSymbolReference) {
-            PsiElement resolvedRef = ((PsiLowerSymbolReference) reference).resolveInterface();
+        if (reference instanceof ORMultiSymbolReference<?>) {
+            PsiElement resolvedRef = ((ORMultiSymbolReference<?>) reference).resolveInterface();
             PsiElement resolvedElement = (resolvedRef instanceof PsiLowerIdentifier || resolvedRef instanceof PsiUpperIdentifier)
                     ? resolvedRef.getParent() : resolvedRef;
 
             if (resolvedElement instanceof PsiQualifiedNamedElement) {
                 LOG.trace("Resolved element", resolvedElement);
                 if (resolvedElement instanceof PsiSignatureElement) {
-                    PsiSignature signature = ((PsiSignatureElement) resolvedElement).getSignature();
-                    if (signature != null) {
-                        return new ArgumentsDescription[]{new ArgumentsDescription((PsiQualifiedNamedElement) resolvedElement, signature)};
+                    PsiSignature resolvedSignature = resolveSignature((PsiSignatureElement) resolvedElement);
+                    if (resolvedSignature != null) {
+                        return new ArgumentsDescription[]{new ArgumentsDescription((PsiQualifiedNamedElement) resolvedElement, resolvedSignature)};
                     }
-                } else {
-                    // Try to read signature from cmt file
-                    // TODO #334
                 }
             }
         }

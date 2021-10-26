@@ -7,8 +7,11 @@ import com.intellij.openapi.vfs.*;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.*;
 import com.intellij.testFramework.fixtures.*;
+import com.intellij.testFramework.utils.parameterInfo.*;
 import com.reason.ide.files.*;
+import com.reason.ide.hints.*;
 import com.reason.lang.core.*;
+import com.reason.lang.core.psi.*;
 import com.reason.lang.core.psi.impl.*;
 import org.jetbrains.annotations.*;
 
@@ -16,7 +19,6 @@ import java.io.*;
 import java.util.*;
 
 public abstract class ORBasePlatformTestCase extends BasePlatformTestCase {
-
     @NotNull
     @SuppressWarnings("UnusedReturnValue")
     protected FileBase configureCode(@NotNull String fileName, @NotNull String code) {
@@ -65,5 +67,35 @@ public abstract class ORBasePlatformTestCase extends BasePlatformTestCase {
         Set<String> paths = new HashSet<>();
         Collections.addAll(paths, values);
         return paths;
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    protected UIInfoContext getParameterInfoUI(ORParameterInfoHandler handler) {
+        MockCreateParameterInfoContext infoContext = new MockCreateParameterInfoContext(myFixture.getEditor(), myFixture.getFile());
+
+        PsiFunctionCallParams paramsOwner = handler.findElementForParameterInfo(infoContext);
+        handler.showParameterInfo(paramsOwner, infoContext);
+
+        ORParameterInfoHandler.ArgumentsDescription arguments = (ORParameterInfoHandler.ArgumentsDescription) infoContext.getItemsToShow()[0];
+
+        MockParameterInfoUIContext<PsiElement> context = new MockParameterInfoUIContext<>(paramsOwner);
+        handler.updateUI(arguments, context);
+
+        MockUpdateParameterInfoContext updateContext = new MockUpdateParameterInfoContext(myFixture.getEditor(), myFixture.getFile());
+        PsiFunctionCallParams updateParamsOwner = handler.findElementForUpdatingParameterInfo(updateContext);
+        updateContext.setParameterOwner(updateParamsOwner);
+        handler.updateParameterInfo(updateParamsOwner, updateContext);
+
+        return new UIInfoContext(context.getText(), updateContext.getCurrentParameter());
+    }
+
+    protected static class UIInfoContext {
+        public String text;
+        public int currentParam;
+
+        public UIInfoContext(String text, int currentParam) {
+            this.text = text;
+            this.currentParam = currentParam;
+        }
     }
 }

@@ -1,16 +1,14 @@
 package com.reason.ide.hints;
 
-import com.intellij.psi.*;
-import com.intellij.testFramework.utils.parameterInfo.*;
 import com.reason.ide.*;
-import com.reason.lang.core.psi.*;
 
 public class RmlParameterInfoHandlerTest extends ORBasePlatformTestCase {
     public void test_basic() {
         configureCode("A.rei", "let add : (int, int) => int;");
         configureCode("B.re", "A.add(<caret>)");
 
-        UIInfoContext context = getParameterInfoUI();
+        UIInfoContext context = getParameterInfoUI(new RmlParameterInfoHandler());
+
         assertEquals("(int, int) => int", context.text);
         assertEquals(0, context.currentParam);
     }
@@ -20,7 +18,8 @@ public class RmlParameterInfoHandlerTest extends ORBasePlatformTestCase {
         configureCode("A.re", "let add = (x, y) => x + y;");
         configureCode("B.re", "A.add(<caret>)");
 
-        UIInfoContext context = getParameterInfoUI();
+        UIInfoContext context = getParameterInfoUI(new RmlParameterInfoHandler());
+
         assertEquals("(int, int) => int", context.text);
         assertEquals(0, context.currentParam);
     }
@@ -29,7 +28,8 @@ public class RmlParameterInfoHandlerTest extends ORBasePlatformTestCase {
         configureCode("A.rei", "let fn : unit => string;");
         configureCode("B.re", "A.fn(<caret>)");
 
-        UIInfoContext context = getParameterInfoUI();
+        UIInfoContext context = getParameterInfoUI(new RmlParameterInfoHandler());
+
         assertEquals("unit => string", context.text);
         assertEquals(0, context.currentParam);
     }
@@ -38,37 +38,29 @@ public class RmlParameterInfoHandlerTest extends ORBasePlatformTestCase {
         configureCode("A.rei", "let add : (int, int) => int;");
         configureCode("B.re", "A.add(1, <caret>)");
 
-        UIInfoContext context = getParameterInfoUI();
+        UIInfoContext context = getParameterInfoUI(new RmlParameterInfoHandler());
+
         assertEquals("(int, int) => int", context.text);
         assertEquals(1, context.currentParam);
     }
 
-    @SuppressWarnings("ConstantConditions")
-    private UIInfoContext getParameterInfoUI() {
-        RmlParameterInfoHandler handler = new RmlParameterInfoHandler();
-        MockCreateParameterInfoContext infoContext = new MockCreateParameterInfoContext(myFixture.getEditor(), myFixture.getFile());
+    public void test_alias() {
+        configureCode("A.rei", "let add : (int, int) => int;");
+        configureCode("B.re", "let b = A.add; b(<caret>)");
 
-        PsiFunctionCallParams paramsOwner = handler.findElementForParameterInfo(infoContext);
-        handler.showParameterInfo(paramsOwner, infoContext);
+        UIInfoContext context = getParameterInfoUI(new RmlParameterInfoHandler());
 
-        MockParameterInfoUIContext<PsiElement> context = new MockParameterInfoUIContext<>(paramsOwner);
-        handler.updateUI((RmlParameterInfoHandler.ArgumentsDescription) infoContext.getItemsToShow()[0], context);
-
-        MockUpdateParameterInfoContext updateContext = new MockUpdateParameterInfoContext(myFixture.getEditor(), myFixture.getFile());
-        PsiFunctionCallParams updateParamsOwner = handler.findElementForUpdatingParameterInfo(updateContext);
-        updateContext.setParameterOwner(updateParamsOwner);
-        handler.updateParameterInfo(updateParamsOwner, updateContext);
-
-        return new UIInfoContext(context.getText(), updateContext.getCurrentParameter());
+        assertEquals("(int, int) => int", context.text);
+        assertEquals(0, context.currentParam);
     }
 
-    static class UIInfoContext {
-        String text;
-        int currentParam;
+    public void test_pipe_first() {
+        configureCode("A.rei", "let add : (option(int), int) => int;");
+        configureCode("B.re", "None->A.add(<caret>)");
 
-        public UIInfoContext(String text, int currentParam) {
-            this.text = text;
-            this.currentParam = currentParam;
-        }
+        UIInfoContext context = getParameterInfoUI(new RmlParameterInfoHandler());
+
+        assertEquals("(option(int), int) => int", context.text);
+        assertEquals(1, context.currentParam);
     }
 }
